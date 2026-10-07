@@ -9,6 +9,7 @@ import (
 	"Sticks_War/ordi"
 	"Sticks_War/screen"
 	"Sticks_War/store"
+	"Sticks_War/unit"
 	"bytes"
 	"fmt"
 	"image/color"
@@ -33,18 +34,30 @@ var mplusSource *text.GoTextFaceSource
 func (g *Game) Update() error {
 	for i := range g.stickMans {
 		sm := &g.stickMans[i]
-		sm.Move(g.rocks, g.camps, gamemode.Mode)
+		sm.Move(g.rocks, g.camps, g.stickMans, gamemode.Mode)
 		sm.Mine(g.rocks)
 		sm.DropMoney(&g.money, g.camps)
 	}
+
+	if gamemode.Mode == "attack" {
+		stickman.CheckColl(&g.stickMans)
+	} else {
+		for i := range g.stickMans {
+			sm := &g.stickMans[i]
+
+			sm.Attack = false
+		}
+	}
+
 	for i := range g.offers {
 		o := g.offers[i]
 		if o.DetectClickOnOffer() {
 			stickman.Spawn(&g.stickMans, g.offers, g.camps[0].X, g.camps[0].Y, o.TypeS, "player", &g.money)
 		}
 	}
-	ordiPurchase := ordi.ManageMoney(g.offers)
-	if ordiPurchase != "not enough money" {
+
+	ordiPurchase, err := ordi.ManageMoney(g.offers)
+	if err == nil {
 		stickman.Spawn(&g.stickMans, g.offers, g.camps[1].X, g.camps[1].Y, ordiPurchase, "ordi", &ordi.Money)
 	}
 
@@ -88,12 +101,22 @@ func main() {
 	mplusSource = s
 
 	g := &Game{
-		money: 500,
+		money: 10,
+
+		camps: []camp.Camp{
+			camp.New(500, screen.Height-350, 1.5),
+			camp.New(500*14, screen.Height-350, -1.5),
+		},
+
+		rocks: []rock.Rock{
+			rock.New(float64(screen.Widht/2), 200),
+			rock.New(float64((screen.Widht/2)*4.5), 200),
+		},
+
+		offers: store.New(),
 	}
-	rock.Init(&g.rocks)
-	camp.Init(&g.camps)
-	store.Init(&g.offers)
-	stickman.Spawn(&g.stickMans, g.offers, g.camps[1].X, g.camps[1].Y, "minner", "ordi", &ordi.Money)
+
+	stickman.Spawn(&g.stickMans, g.offers, g.camps[1].X, g.camps[1].Y, unit.Miner, "ordi", &ordi.Money)
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)

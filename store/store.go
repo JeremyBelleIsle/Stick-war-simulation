@@ -2,6 +2,7 @@ package store
 
 import (
 	"Sticks_War/screen"
+	"Sticks_War/unit"
 	"fmt"
 	"image/color"
 
@@ -17,14 +18,14 @@ type Offer struct {
 	bodyClr    color.RGBA
 	outLineClr color.RGBA
 	Cost       int
-	TypeS      string
+	TypeS      unit.Type
 }
 
-func Init(offers *[]Offer) {
-	*offers = []Offer{
-		{x: screen.Widht - 500, y: 50, w: 470, h: 70, outLineClr: color.RGBA{255, 223, 0, 255}, bodyClr: color.RGBA{0, 32, 255, 255}, Cost: 5, TypeS: "minner"},
-		{x: screen.Widht - 500, y: 150, w: 470, h: 70, outLineClr: color.RGBA{255, 223, 0, 255}, bodyClr: color.RGBA{0, 32, 255, 255}, Cost: 5, TypeS: "attacker"},
-		{x: screen.Widht - 500, y: 250, w: 470, h: 70, outLineClr: color.RGBA{255, 223, 0, 255}, bodyClr: color.RGBA{0, 32, 255, 255}, Cost: 7, TypeS: "archer"},
+func New() []Offer {
+	return []Offer{
+		{x: screen.Widht - 500, y: 50, w: 470, h: 70, outLineClr: color.RGBA{255, 223, 0, 255}, bodyClr: color.RGBA{0, 32, 255, 255}, Cost: 5, TypeS: unit.Miner},
+		{x: screen.Widht - 500, y: 150, w: 470, h: 70, outLineClr: color.RGBA{255, 223, 0, 255}, bodyClr: color.RGBA{0, 32, 255, 255}, Cost: 5, TypeS: unit.Attacker},
+		{x: screen.Widht - 500, y: 250, w: 470, h: 70, outLineClr: color.RGBA{255, 223, 0, 255}, bodyClr: color.RGBA{0, 32, 255, 255}, Cost: 7, TypeS: unit.Archer},
 	}
 }
 
@@ -47,7 +48,7 @@ func (o *Offer) Draw(screenI *ebiten.Image, mplusSource *text.GoTextFaceSource) 
 	// draw the outline of the box
 	vector.StrokeRect(screenI, o.x, o.y, o.w, o.h, 10, o.outLineClr, true)
 	// draw description
-	gameutil.DrawText(o.TypeS, 40, screen.Widht, float64(o.x)+20, float64(o.y)+20, 0, screenI, color.RGBA{255, 255, 255, 255}, mplusSource)
+	gameutil.DrawText(o.TypeS.String(), 40, screen.Widht, float64(o.x)+20, float64(o.y)+20, 0, screenI, color.RGBA{255, 255, 255, 255}, mplusSource)
 	// draw cost
 	gameutil.DrawText(fmt.Sprintf("%d$", o.Cost), 40, screen.Widht, float64(o.x)-150, float64(o.y)+20, 0, screenI, color.RGBA{255, 255, 255, 255}, mplusSource)
 }
